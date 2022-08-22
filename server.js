@@ -41,6 +41,15 @@ app.post("/api/notes", (req, res) => {
     })
 })
 //any new route here
+app.delete("api/notes", (req, res) => {
+    res.send("DELETE Request Called")
+})
+
+app.listen(PORT, function(err) {
+    if (err) 
+    console.log(err);
+    console.log("Server listening on PORT", PORT);
+});
 
 app.get("*", (req, res) => {
     res.sendFile(path.join(__dirname, "/public/index.html"))
