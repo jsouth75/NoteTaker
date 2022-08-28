@@ -1,18 +1,20 @@
 const express = require("express");
 const path = require("path");
 const fs = require("fs");
+const notes = require("./db/db.json");
+const  uuid = require('uuid');
 
-const app = express()
 const PORT = process.env.PORT || 3001;
+const app = express();
 
-app.use(express.urlencoded({extended: true}))
-app.use(express.json())
-app.use(express.static("public"))
+app.use(express.urlencoded({extended: true}));
+app.use(express.json());
+app.use(express.static("public"));
 
-//routes
+// routes
 app.get("/notes", (req, res) => {
     res.sendFile(path.join(__dirname, "/public/notes.html"))
-})
+});
 
 app.get("/api/notes", (req, res) => {
     fs.readFile("./db/db.json", (err, data) => {
@@ -41,8 +43,13 @@ app.post("/api/notes", (req, res) => {
     })
 })
 //any new route here
-app.delete("api/notes", (req, res) => {
-    res.send("DELETE Request Called")
+app.delete("api/notes/:id", (req, res) => {
+    const notes = JSON.parse(fs.readFileSync("./db/db.json"));
+    const deleteNote = notes.filter((removeNote) => removeNote.id !== req.params.id);
+    fs.writeFileSync("./db/db.json", JSON.stringify(deleteNote));
+    res.json(deleteNote);
+
+    // res.send("DELETE Request Called")
 })
 
 app.listen(PORT, function(err) {
@@ -53,8 +60,4 @@ app.listen(PORT, function(err) {
 
 app.get("*", (req, res) => {
     res.sendFile(path.join(__dirname, "/public/index.html"))
-})
-
-app.listen(PORT, () => {
-    console.log("yo")
-})
+});
