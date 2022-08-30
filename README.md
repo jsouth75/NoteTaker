@@ -11,12 +11,14 @@
 
 ## Description
 
-This app is a simple design for a user to write, save, and delete notes.   
+This app is a simple design for users to write, save, and delete notes.   
+
+<img src="./public/assets/Note_Taker_screenshot.png">
 
 ## Usage
 
 Click on the following link to deploy this app 
-<a href="https://jsouth-note-taker.herokuapp.com/" title="NoteTaker_app">click here</a>
+<a href="https://jsouth-note-taker.herokuapp.com/" title="NoteTaker_app">Note Taker</a>
 
 ## License
 
