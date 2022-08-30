@@ -1,63 +1,53 @@
 const express = require("express");
 const path = require("path");
 const fs = require("fs");
-const notes = require("./db/db.json");
-const  uuid = require('uuid');
+const dataJson = require("./db/db.json");
+const { v4: uuidv4 } = require('uuid');
 
 const PORT = process.env.PORT || 3001;
 const app = express();
 
-app.use(express.urlencoded({extended: true}));
 app.use(express.json());
+app.use(express.urlencoded({extended: true}));
 app.use(express.static("public"));
 
 // routes
-app.get("/notes", (req, res) => {
-    res.sendFile(path.join(__dirname, "/public/notes.html"))
+
+app.get("/notes", (req, res) =>
+    res.sendFile(path.join(__dirname, "./public/notes.html"))
+);
+
+app.get("/api/notes", (req, res) =>
+    res.json(dataJson)
+);
+
+app.post('/api/notes', (req, res) => {
+    const newNote = fs.readFileSync(path.join(__dirname, './db/db.json'), "utf-8");
+    req.body.id = uuidv4()
+    dataJson.push(req.body);
+
+    fs.writeFileSync(path.join(__dirname, './db/db.json'), JSON.stringify(dataJson), "utf-8");
+    res.json(dataJson);
+});                     
+
+//new routes here
+app.get('/', (req, res) =>
+    res.sendFile(path.join(__dirname, "./public/index.html"))
+);
+                        
+// delete note
+app.delete("/api/notes/:id", (req, res) => {
+    const deleteNote = req.params.id
+    const index = dataJson.findIndex((note) => note.id === deleteNote);
+    dataJson.splice(index, 1);
+    
+    fs.writeFile(__dirname + "/db/db.json", JSON.stringify((dataJson), null, 4), "utf8", () => {
+        res.json(dataJson);
+    })
 });
-
-app.get("/api/notes", (req, res) => {
-    fs.readFile("./db/db.json", (err, data) => {
-        if(err) throw err;
-        const notes = JSON.parse(data)
-        
-        res.json(notes)
-    })
-})
-
-app.post("/api/notes", (req, res) => {
-    fs.readFile("./db/db.json", (err, data) => {
-        if(err) throw err;
-        const notes = JSON.parse(data)
-        
-        const newNote = req.body;
-        newNote.id = Math.floor(Math.random() * 1000000)
-
-        notes.push(newNote);
-
-        fs.writeFile("./db/db.json", JSON.stringify(notes), (err => {
-            if(err) throw err;
-
-            res.json("added a new note")
-        }))
-    })
-})
-//any new route here
-app.delete("api/notes/:id", (req, res) => {
-    const notes = JSON.parse(fs.readFileSync("./db/db.json"));
-    const deleteNote = notes.filter((removeNote) => removeNote.id !== req.params.id);
-    fs.writeFileSync("./db/db.json", JSON.stringify(deleteNote));
-    res.json(deleteNote);
-
-    // res.send("DELETE Request Called")
-})
-
+    
 app.listen(PORT, function(err) {
     if (err) 
     console.log(err);
-    console.log("Server listening on PORT", PORT);
-});
-
-app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "/public/index.html"))
+    console.log(`Server listening on PORT ${PORT}`)
 });
